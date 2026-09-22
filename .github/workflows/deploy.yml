@@ -9,9 +9,9 @@ on:
 
 env:
   # TODO: troque pelo seu slug, o começo do seu e-mail com ponto virando hífen.
-  SLUG: SEU-SLUG
+  SLUG: walyson-fidelis
   # TODO: a primeira porta da sua faixa. Veja em `gr-docker ajuda`.
-  PORTA: 230N0
+  PORTA: 23300
 
 jobs:
   deploy:
