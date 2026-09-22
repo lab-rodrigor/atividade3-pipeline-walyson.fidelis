@@ -29,8 +29,19 @@ jobs:
       - name: Derrubar a topologia antiga
         run: |
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker rm -f gr-${{ env.SLUG }}-front gr-${{ env.SLUG }}-api gr-${{ env.SLUG }}-banco || true"
+            "gr-docker stop gr-${{ env.SLUG }}-front || true"
+          ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
+            "gr-docker stop gr-${{ env.SLUG }}-api || true"
+          ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
+            "gr-docker stop gr-${{ env.SLUG }}-banco || true"
 
+          ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
+            "gr-docker rm gr-${{ env.SLUG }}-front || true"
+          ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
+            "gr-docker rm gr-${{ env.SLUG }}-api || true"
+          ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
+            "gr-docker rm gr-${{ env.SLUG }}-banco || true"
+            
       - name: Criar rede e volume
         run: |
           # TODO: as duas redes e o volume. A rede do banco é interna.
