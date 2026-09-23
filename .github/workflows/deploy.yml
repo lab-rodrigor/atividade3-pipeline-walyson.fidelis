@@ -29,38 +29,49 @@ jobs:
       - name: Derrubar a topologia antiga
         run: |
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker stop gr-${{ env.SLUG }}-front || true"
-          ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker stop gr-${{ env.SLUG }}-api || true"
-          ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker stop gr-${{ env.SLUG }}-banco || true"
+            "gr-docker stop gr-${{ env.SLUG }}-front >/dev/null 2>&1 || :"
 
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker rm gr-${{ env.SLUG }}-front || true"
+            "gr-docker stop gr-${{ env.SLUG }}-api >/dev/null 2>&1 || :"
+
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker rm gr-${{ env.SLUG }}-api || true"
+            "gr-docker stop gr-${{ env.SLUG }}-banco >/dev/null 2>&1 || :"
+
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker rm gr-${{ env.SLUG }}-banco || true"
+            "gr-docker rm gr-${{ env.SLUG }}-front >/dev/null 2>&1 || :"
+
+          ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
+            "gr-docker rm gr-${{ env.SLUG }}-api >/dev/null 2>&1 || :"
+
+          ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
+            "gr-docker rm gr-${{ env.SLUG }}-banco >/dev/null 2>&1 || :"
             
       - name: Criar rede e volume
         run: |
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker network create dados --interna || true"
+            "gr-docker network create dados --interna >/dev/null 2>&1 || :"
 
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker network create web || true"
+            "gr-docker network create web >/dev/null 2>&1 || :"
 
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker volume create pgdata || true"
+            "gr-docker volume create pgdata >/dev/null 2>&1 || :"
 
       - name: Subir banco, API e front
         run: |
-          # TODO: os três containers, na ordem certa.
-          # O front precisa receber o commit que o deploy publicou:
-          #   -e DEPLOY_SHA=${{ github.sha }}
-          echo "TODO"
+          ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
+            "gr-docker run postgres:17-alpine --name banco --network dados -e POSTGRES_PASSWORD='${{ secrets.DB_SENHA }}' -e POSTGRES_DB=pokedex -v pgdata:/var/lib/postgresql/data -d"
+
+          ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
+            "gr-docker run gr-atv2-api:1 --name api --network dados -e POSTGRES_HOST=gr-${{ env.SLUG }}-banco -e POSTGRES_DB=pokedex -e POSTGRES_PASSWORD='${{ secrets.DB_SENHA }}' -d"
+
+          ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
+            "gr-docker network connect web api"
+
+          ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
+            "gr-docker run gr-atv2-front:1 --name front --network web -e API=gr-${{ env.SLUG }}-api -e DEPLOY_SHA=${{ github.sha }} -p ${{ env.PORTA }}:80 -d"
 
       - name: Conferir que subiu
         run: |
-          # TODO: pergunte ao servidor se a listagem responde.
-          echo "TODO"
+          ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
+            "gr-docker meus"
