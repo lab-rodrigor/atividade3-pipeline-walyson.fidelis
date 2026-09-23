@@ -2,7 +2,6 @@ name: deploy
 
 # O pipeline faz o que você fez à mão na atividade 2. A cada push na main, ele
 # derruba a topologia e sobe de novo, do zero.
-# Teste de idempotencia.o.
 on:
   push:
     branches: [main]
@@ -30,22 +29,22 @@ jobs:
       - name: Derrubar a topologia antiga
         run: |
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker meus | grep -q 'gr-${{ env.SLUG }}-front' && gr-docker stop gr-${{ env.SLUG }}-front || true"
+            "if gr-docker ps -a | grep -q 'gr-${{ env.SLUG }}-front'; then gr-docker stop gr-${{ env.SLUG }}-front >/dev/null 2>&1 || true; fi"
 
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker meus | grep -q 'gr-${{ env.SLUG }}-api' && gr-docker stop gr-${{ env.SLUG }}-api || true"
+            "if gr-docker ps -a | grep -q 'gr-${{ env.SLUG }}-api'; then gr-docker stop gr-${{ env.SLUG }}-api >/dev/null 2>&1 || true; fi"
 
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker meus | grep -q 'gr-${{ env.SLUG }}-banco' && gr-docker stop gr-${{ env.SLUG }}-banco || true"
+            "if gr-docker ps -a | grep -q 'gr-${{ env.SLUG }}-banco'; then gr-docker stop gr-${{ env.SLUG }}-banco >/dev/null 2>&1 || true; fi"
 
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker meus | grep -q 'gr-${{ env.SLUG }}-front' && gr-docker rm gr-${{ env.SLUG }}-front || true"
+            "if gr-docker ps -a | grep -q 'gr-${{ env.SLUG }}-front'; then gr-docker rm gr-${{ env.SLUG }}-front >/dev/null 2>&1 || true; fi"
 
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker meus | grep -q 'gr-${{ env.SLUG }}-api' && gr-docker rm gr-${{ env.SLUG }}-api || true"
+            "if gr-docker ps -a | grep -q 'gr-${{ env.SLUG }}-api'; then gr-docker rm gr-${{ env.SLUG }}-api >/dev/null 2>&1 || true; fi"
 
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker meus | grep -q 'gr-${{ env.SLUG }}-banco' && gr-docker rm gr-${{ env.SLUG }}-banco || true"
+            "if gr-docker ps -a | grep -q 'gr-${{ env.SLUG }}-banco'; then gr-docker rm gr-${{ env.SLUG }}-banco >/dev/null 2>&1 || true; fi"
 
       - name: Criar rede e volume
         run: |
@@ -74,7 +73,5 @@ jobs:
 
       - name: Conferir que subiu
         run: |
-          ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker meus"
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
             "gr-docker meus"
