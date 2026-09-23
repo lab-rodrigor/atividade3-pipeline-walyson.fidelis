@@ -44,9 +44,14 @@ jobs:
             
       - name: Criar rede e volume
         run: |
-          # TODO: as duas redes e o volume. A rede do banco é interna.
-          # Dica: criar o que já existe devolve erro. Trate isso.
-          echo "TODO"
+          ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
+            "gr-docker network create dados --interna || true"
+
+          ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
+            "gr-docker network create web || true"
+
+          ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
+            "gr-docker volume create pgdata || true"
 
       - name: Subir banco, API e front
         run: |
