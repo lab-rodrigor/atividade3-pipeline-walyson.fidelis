@@ -2,6 +2,7 @@ name: deploy
 
 # O pipeline faz o que você fez à mão na atividade 2. A cada push na main, ele
 # derruba a topologia e sobe de novo, do zero.
+# Teste de idempotencia.o.
 on:
   push:
     branches: [main]
