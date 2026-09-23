@@ -29,23 +29,23 @@ jobs:
       - name: Derrubar a topologia antiga
         run: |
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker stop gr-${{ env.SLUG }}-front >/dev/null 2>&1 || :"
+            "gr-docker meus | grep -q 'gr-${{ env.SLUG }}-front' && gr-docker stop gr-${{ env.SLUG }}-front || true"
 
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker stop gr-${{ env.SLUG }}-api >/dev/null 2>&1 || :"
+            "gr-docker meus | grep -q 'gr-${{ env.SLUG }}-api' && gr-docker stop gr-${{ env.SLUG }}-api || true"
 
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker stop gr-${{ env.SLUG }}-banco >/dev/null 2>&1 || :"
+            "gr-docker meus | grep -q 'gr-${{ env.SLUG }}-banco' && gr-docker stop gr-${{ env.SLUG }}-banco || true"
 
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker rm gr-${{ env.SLUG }}-front >/dev/null 2>&1 || :"
+            "gr-docker meus | grep -q 'gr-${{ env.SLUG }}-front' && gr-docker rm gr-${{ env.SLUG }}-front || true"
 
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker rm gr-${{ env.SLUG }}-api >/dev/null 2>&1 || :"
+            "gr-docker meus | grep -q 'gr-${{ env.SLUG }}-api' && gr-docker rm gr-${{ env.SLUG }}-api || true"
 
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
-            "gr-docker rm gr-${{ env.SLUG }}-banco >/dev/null 2>&1 || :"
-            
+            "gr-docker meus | grep -q 'gr-${{ env.SLUG }}-banco' && gr-docker rm gr-${{ env.SLUG }}-banco || true"
+
       - name: Criar rede e volume
         run: |
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
@@ -73,5 +73,7 @@ jobs:
 
       - name: Conferir que subiu
         run: |
+          ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
+            "gr-docker meus"
           ssh -i ~/.ssh/deploy gr-${{ env.SLUG }}@gr.lab.ayty.org \
             "gr-docker meus"
